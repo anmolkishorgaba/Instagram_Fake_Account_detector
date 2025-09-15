@@ -1,0 +1,95 @@
+import tensorflow as tf
+import os
+from PIL import Image
+import numpy as np
+import joblib
+import pandas as pd
+import sys
+
+# Set environment encoding to UTF-8
+os.environ["PYTHONIOENCODING"] = "utf-8"
+
+# Ensure sys.stdout uses UTF-8 encoding
+sys.stdout.reconfigure(encoding='utf-8')
+
+# Arrays to store predictions from CNN and RF models
+cnn_predictions = []
+rf_predictions = []
+ground_truth_labels = []
+
+cnn_model = tf.keras.models.load_model('profile_pic_classifier.h5')
+rf_model = joblib.load('random_forest_model.pkl') 
+
+def preprocess_profile_pic_for_cnn(image_path: str):
+    try:
+        if not os.path.exists(image_path):
+            print(f"File not found: {image_path}. Skipping this iteration.")
+            return None  # Return None to indicate the picture does not exist
+        image = Image.open(image_path)
+        image = image.resize((224, 224))
+        image_array = np.array(image)
+        image_array = image_array / 255.0
+        image_array = np.expand_dims(image_array, axis=0)
+        return image_array
+    except Exception as e:
+        raise ValueError(f"Error in preprocessing image: {str(e)}")
+
+# CNN Prediction
+def predict_with_cnn(image_array):
+    try:
+        prediction = cnn_model.predict(image_array)
+        predicted_class = np.argmax(prediction, axis=1)
+        return 1 if predicted_class[0] == 1 else 0  # 1 for fake, 0 for real
+    except Exception as e:
+        raise ValueError(f"Error in CNN prediction: {str(e)}")
+    
+def predict_with_random_forest(rf_model,features):
+    try:
+        prediction = rf_model.predict(features)
+        return 1 if prediction[0] == 1 else 0  # 1 for fake, 0 for real
+    except Exception as e:
+        raise ValueError(f"Error in Random Forest prediction: {str(e)}")
+
+
+df =  pd.read_csv('meta_csv - final_csv.csv.csv')
+
+# Loop over your training dataset
+for index, sample in df.iterrows():  # Replace with your actual dataset
+        
+    # 1. Get profile picture and preprocess it for the CNN
+    profile_pic_path = sample['Profile Pic Path']  # Path to the profile picture
+    profile_pic_array = preprocess_profile_pic_for_cnn(profile_pic_path)
+    if profile_pic_array is None:
+        continue
+
+
+    try:
+        # 2. Get profile features for Random Forest
+        profile_rf_features = np.array([sample['Number of Posts'], sample['Followers'], sample['Following'], sample['follower_following_ratio']]).reshape(1, -1)
+
+        # 3. CNN Prediction
+        cnn_pred = predict_with_cnn(profile_pic_array)  # This returns 1 for fake, 0 for real
+        cnn_predictions.append(cnn_pred)
+
+        # 4. Random Forest Prediction
+        rf_pred = predict_with_random_forest(rf_model, profile_rf_features)  # This returns 1 for fake, 0 for real
+        rf_predictions.append(rf_pred)
+
+        # 5. Store the true label for this sample (1 for fake, 0 for real)
+        ground_truth_labels.append(sample['Label'])
+    except Exception as e:
+        raise ValueError(f"Error in CNN prediction: {str(e).encode('utf-8', 'ignore').decode('utf-8')}")
+    except UnicodeEncodeError as e:
+        raise ValueError(f"Error in CNN prediction (encoding issue): {str(e).encode('ascii', 'ignore').decode('ascii')}")
+    except ValueError as e:
+        print(f"Error in CNN prediction: {str(e)}")
+        continue  # Skip this iteration if there's an error in CNN prediction
+
+# Convert lists to numpy arrays for training the meta-model
+cnn_predictions = np.array(cnn_predictions)
+rf_predictions = np.array(rf_predictions)
+ground_truth_labels = np.array(ground_truth_labels)
+
+print(cnn_predictions)
+print(rf_predictions)
+print(ground_truth_labels)

@@ -1,0 +1,146 @@
+/* General styles */
+/* Flexbox layout to center the container */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #1f1c2c, #928dab); /* Gradient background */
+    color: #f2f2f2;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible; /* Prevents the body from scrolling */
+    position: relative; /* Ensure positioning of pseudo-elements */
+}
+
+/* Floating circles background */
+body::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 350px;
+    height: 350px;
+    background-color: rgba(255, 255, 255, 0.15); /* Lighter for better contrast */
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: float 15s infinite ease-in-out;
+    z-index: 0; /* Behind the container */
+}
+
+body::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 250px;
+    height: 250px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    filter: blur(100px);
+    animation: float-reverse 18s infinite ease-in-out reverse;
+    z-index: 0; /* Behind the container */
+}
+
+/* Reverse animation for more variety */
+@keyframes float {
+    0% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(50px, 50px);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+@keyframes float-reverse {
+    0% {
+        transform: translate(0, 0);
+    }
+    50% {
+        transform: translate(-50px, -50px);
+    }
+    100% {
+        transform: translate(0, 0);
+    }
+}
+
+/* Container for the form */
+.container {
+    position: relative;
+    z-index: 2; /* Keeps it above the background */
+    background-color: rgba(26, 26, 26, 0.95); /* Almost black with slight transparency */
+    padding: 40px 30px; /* Adjusted padding for smaller screens */
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.7);
+    width: 90vw; /* Make the container responsive to screen width */
+    max-width: 500px; /* Maximum width for larger screens */
+    height: auto; /* Automatically adjust height */
+    text-align: center;
+}
+
+/* Heading and form styles */
+h2 {
+    font-size: 2.2rem;
+    color: #ffa07a; /* Soft coral */
+    margin-bottom: 25px;
+    text-shadow: 2px 2px 5px rgba(255, 160, 122, 0.5); /* Soft glow */
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 12px;
+    border-radius: 5px;
+    border: 2px solid #ffa07a; /* Coral border */
+    font-size: 1rem;
+    background-color: #0a0a0a;
+    color: #f2f2f2;
+    margin-bottom: 20px;
+    transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus {
+    border-color: #ff7f50; /* Slightly brighter coral when focused */
+    outline: none;
+}
+
+button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 50px;
+    background: linear-gradient(145deg, #ffa07a, #ff6347); /* Coral to tomato gradient */
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 25px rgba(255, 160, 122, 0.6); /* Glowing effect on hover */
+}
+
+.result {
+    margin-top: 20px;
+    font-size: 1.5rem;
+    color: #ffa07a; /* Coral for result text */
+    text-shadow: 1px 1px 3px rgba(255, 160, 122, 0.5); /* Soft glow */
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #ffa07a;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #333; /* Darker background for contrast */
+}

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instagram Profile Checker</title>
+    <link rel="stylesheet" href="static/style.css"> <!-- Link to your CSS file -->
+    
+</head>
+<body>
+
+    <div class="container">
+        <h2>Instagram Profile Checker</h2>
+        <h3>Is it Genuine? Find Out Now with Our Profile Checker!</h3>
+        <input type="text" id="username" placeholder="Enter Instagram username">
+        <button onclick="checkProfile()">Check Profile</button>
+        
+        <div class="result" id="result"></div>
+
+        <!-- Profile Picture Section -->
+        <div id="profile-pic-container" style="display:none;">
+            <h3>Profile Picture:</h3>
+            <img id="profile_pics" src="" alt="Profile Picture" style="width:150px; height:150px; border-radius: 50%; border: 2px solid #ffaa69;">
+        </div>
+
+        <!-- Profile Details Section -->
+        <div id="profile-details" style="display:none;">
+            <h3>Profile Details:</h3>
+            <p><strong>Username:</strong> <span id="profile-username"></span></p>
+            <p><strong>Followers:</strong> <span id="followers"></span></p>
+            <p><strong>Following:</strong> <span id="following"></span></p>
+            <p><strong>Number of Posts:</strong> <span id="num-posts"></span></p>
+            <p><strong>Bio:</strong> <span id="bio"></span></p>
+        </div>
+    </div>
+
+    <script>
+        async function checkProfile() {
+            const username = document.getElementById('username').value;
+            const resultDiv = document.getElementById('result');
+            const profilePicContainer = document.getElementById('profile-pic-container');
+            const profilePic = document.getElementById('profile_pics');
+            const profileDetails = document.getElementById('profile-details');
+            const profileUsername = document.getElementById('profile-username');
+            const followers = document.getElementById('followers');
+            const following = document.getElementById('following');
+            const numPosts = document.getElementById('num-posts');
+            const bio = document.getElementById('bio');
+
+            if (!username) {
+                resultDiv.innerHTML = '<p style="color: red;">Please enter a username!</p>';
+                return;
+            }
+
+            try {
+                resultDiv.innerHTML = 'Checking...';
+
+                // Fetch prediction data
+                const response = await fetch(`/predict/?username=${username}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Display result and update profile picture
+                    resultDiv.innerHTML = `<p>Result: <strong>${data.prediction}</strong></p>`;
+                    profilePic.src = data.profile_pic_url; // Use URL from the API response
+                    profilePicContainer.style.display = 'block';
+
+                    // Display other profile details
+                    profileUsername.textContent = data.username;
+                    followers.textContent = data.followers;
+                    following.textContent = data.following;
+                    numPosts.textContent = data.num_posts;
+                    bio.textContent = data.bio || "No bio available";
+                    profileDetails.style.display = 'block'; // Show profile details container
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">Error: ${data.detail}</p>`;
+                    profilePicContainer.style.display = 'none'; // Hide profile pic container
+                    profileDetails.style.display = 'none'; // Hide profile details container
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = '<p style="color: red;">Failed to fetch the result!</p>';
+                profilePicContainer.style.display = 'none'; // Hide profile pic container
+                profileDetails.style.display = 'none'; // Hide profile details container
+            }
+        }
+    </script>
+</body>
+</html>
+

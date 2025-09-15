@@ -1,0 +1,61 @@
+import joblib
+import instaloader
+from sklearn.ensemble import RandomForestClassifier
+
+model = joblib.load('C:/Users/shriv/Downloads/Minor_Project/Models/tabular_model/random_forest_model.pkl')
+import instaloader
+import re
+
+def extract_instagram_profile(username):
+    """
+    Extract Instagram profile information using Instaloader.
+    
+    Parameters:
+    - username: Instagram username as a string.
+
+    Returns:
+    - A list of 15 features for the account to predict.
+    """
+    L = instaloader.Instaloader()
+    
+    try:
+        # Load profile from Instagram
+        profile = instaloader.Profile.from_username(L.context, username)
+        L.login('sai_abinav','Saiabhinav123')
+        # Feature 1: Number of Posts
+        number_of_posts = profile.mediacount
+        
+        # Feature 2: Followers
+        followers = profile.followers
+        
+        # Feature 3: Following
+        following = profile.followees
+
+        follower_following_ratio = followers / following if following != 0 else 0
+        
+        # Combine all features into a list
+        features = [number_of_posts, followers, following, follower_following_ratio]
+        
+        return features
+
+    except instaloader.exceptions.ProfileNotExistsException:
+        print("The profile does not exist.")
+        return None
+
+def predict_account_status(model, account_features):
+    prediction = model.predict([account_features])[0]
+    
+    if prediction == 1:
+        return "Fake"
+    else:
+        return "Not Fake"
+
+# Example usage
+username = input("Enter the Instagram username: ")
+account_features = extract_instagram_profile(username)
+
+if account_features:
+    status = predict_account_status(model, account_features)
+    print(f"The Instagram account is predicted to be: {status}")
+
+
